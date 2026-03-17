@@ -16,9 +16,9 @@ import java.util.Date;
 public class ArquivoPessoaReaderConfig {
 
     @Bean
-    public FlatFileItemReader<Pessoa> arquivoPessoaReader(){
+    public FlatFileItemReader<Pessoa> pessoaReader(){
         return new FlatFileItemReaderBuilder<Pessoa>()
-                .name("arquivoPessoaReader")
+                .name("pessoaReader")
                 .resource(new FileSystemResource("files/pessoas.csv"))
                 .delimited()
                 .names("nome","email","dataNascimento","idade","id")
