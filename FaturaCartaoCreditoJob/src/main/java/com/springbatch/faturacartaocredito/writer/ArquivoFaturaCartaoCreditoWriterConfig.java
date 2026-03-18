@@ -18,12 +18,12 @@ import java.text.SimpleDateFormat;
 @Configuration
 public class ArquivoFaturaCartaoCreditoWriterConfig {
     @Bean
-    public MultiResourceItemWriter<FaturaCartaoCredito> arquivosFaturaCartaoCredito(){
+    MultiResourceItemWriter<FaturaCartaoCredito> arquivosFaturaCartaoCredito() {
         return new MultiResourceItemWriterBuilder<FaturaCartaoCredito>()
-                .name("arquivoFaturaCartaoCredito")
+                .name("arquivosFaturaCartaoCredito")
                 .resource(new FileSystemResource("files/fatura"))
                 .itemCountLimitPerResource(1)
-                .resourceSuffixCreator(sufixCreator())
+                .resourceSuffixCreator(suffixCreator())
                 .delegate(arquivoFaturaCartaoCredito())
                 .build();
     }
@@ -34,53 +34,60 @@ public class ArquivoFaturaCartaoCreditoWriterConfig {
                 .resource(new FileSystemResource("files/fatura.txt"))
                 .lineAggregator(lineAggregator())
                 .headerCallback(headerCallback())
-                .footerCallback(footerCallBack())
+                .footerCallback(footerCallback())
                 .build();
     }
 
-    private FlatFileFooterCallback footerCallBack() {
-        return new TotalTransacoesFooterCallBack();
+    @Bean
+    public FlatFileFooterCallback footerCallback() {
+        return new TotalTransacoesFooterCallback();
     }
 
     private FlatFileHeaderCallback headerCallback() {
         return new FlatFileHeaderCallback() {
+
             @Override
             public void writeHeader(Writer writer) throws IOException {
-                writer.append((String.format("%121s\n", "Cartao XPTO")))
-                        .append(String.format("%121s\n\n","Rua Vergueiro, 131"));
+                writer.append(String.format("%121s\n", "Cartão XPTO"));
+                writer.append(String.format("%121s\n\n", "Rua Vergueiro, 131"));
             }
         };
     }
 
     private LineAggregator<FaturaCartaoCredito> lineAggregator() {
         return new LineAggregator<FaturaCartaoCredito>() {
+
             @Override
             public String aggregate(FaturaCartaoCredito faturaCartaoCredito) {
-                StringBuilder writer = new StringBuilder()
-                        .append(String.format("Nome: %4\n",faturaCartaoCredito.getCliente().getNome()))
-                        .append(String.format("Endereco: %s\n\n\n",faturaCartaoCredito.getCliente().getEndereco()))
-                        .append(String.format("Fatura completa do cartao %d\n",faturaCartaoCredito.getCartaoCredito().getNumetoCartaoCredito()))
-                        .append("------------\n")
-                        .append("Data Descricao Valor \n")
-                        .append("------------\n");
-                for(Transacao transacao:faturaCartaoCredito.getTransacoes()){
-                    writer.append(String.format(
-                            "\n[%10s] %-80s %s",
+                StringBuilder writer = new StringBuilder();
+                writer.append(String.format("Nome: %s\n", faturaCartaoCredito.getCliente().getNome()));
+                writer.append(String.format("Endereço: %s\n\n\n", faturaCartaoCredito.getCliente().getEndereco()));
+                writer.append(String.format("Fatura completa do cartão %d\n",
+                        faturaCartaoCredito.getCartaoCredito().getNumetoCartaoCredito()));
+                writer.append(
+                        "-------------------------------------------------------------------------------------------------------------------------\n");
+                writer.append("DATA DESCRICAO VALOR\n");
+                writer.append(
+                        "-------------------------------------------------------------------------------------------------------------------------\n");
+
+                for (Transacao transacao : faturaCartaoCredito.getTransacoes()) {
+                    writer.append(String.format("\n[%10s] %-80s - %s",
                             new SimpleDateFormat("dd/MM/yyyy").format(transacao.getData()),
                             transacao.getDescricao(),
-                            NumberFormat.getCurrencyInstance().format(transacao.getValor())
-                    ));
+                            NumberFormat.getCurrencyInstance().format(transacao.getValor())));
                 }
                 return writer.toString();
             }
+
         };
     }
 
-    private ResourceSuffixCreator sufixCreator() {
+    private ResourceSuffixCreator suffixCreator() {
         return new ResourceSuffixCreator() {
+
             @Override
             public String getSuffix(int index) {
-                return index+".txt";
+                return index + ".txt";
             }
         };
     }

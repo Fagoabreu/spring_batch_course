@@ -5,10 +5,12 @@ import com.springbatch.faturacartaocredito.domain.FaturaCartaoCredito;
 import org.jspecify.annotations.Nullable;
 import org.springframework.batch.infrastructure.item.ItemProcessor;
 import org.springframework.batch.infrastructure.item.validator.ValidationException;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
+@Configuration
 public class CarregaDadosClienteProcessor implements ItemProcessor<FaturaCartaoCredito,FaturaCartaoCredito> {
     private final RestTemplate restTemplate = new RestTemplate();
 
